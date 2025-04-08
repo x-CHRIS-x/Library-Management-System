@@ -122,25 +122,24 @@ public class Login extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
-        
+
         String Username = txtusername.getText();
         String Pass = txtpassword.getText();
-        
+
         if (Username.isEmpty() || Pass.isEmpty()) {
-             JOptionPane.showMessageDialog(this, "Please enter both Username and Password!");
-            } 
+            JOptionPane.showMessageDialog(this, "Please enter both Username and Password!");
+        }
         else if (Username.equals("Admin") && Pass.equals("1234")) {
             Main mainFrame = new Main();
             this.dispose();
             mainFrame.setVisible(true);
-        } 
+        }
         else {
             JOptionPane.showMessageDialog(this, "Username or Password is incorrect!");
             txtusername.setText("");
             txtpassword.setText("");
             txtusername.requestFocus();
         }
-
     }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
