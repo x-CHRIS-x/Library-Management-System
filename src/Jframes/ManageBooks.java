@@ -302,6 +302,7 @@ public class ManageBooks extends javax.swing.JFrame {
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         // TODO add your handling code here:
+        deleteBook();
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
@@ -379,36 +380,77 @@ private void addBook() {
     }
 }
 
-    private void loadBooksToTable() {
+private void deleteBook() {
+    int selectedRow = bookTable.getSelectedRow();
+
+    if (selectedRow == -1) {
+        javax.swing.JOptionPane.showMessageDialog(null, "Please select a book to delete.");
+        return;
+    }
+
+    // Get the book_id from the selected row
+    String bookId = bookTable.getValueAt(selectedRow, 0).toString();
+
+    int confirm = javax.swing.JOptionPane.showConfirmDialog(
+        null,
+        "Are you sure you want to delete the book with ID: " + bookId + "?",
+        "Confirm Delete",
+        javax.swing.JOptionPane.YES_NO_OPTION
+    );
+
+    if (confirm == javax.swing.JOptionPane.YES_OPTION) {
         Connection conn = DBConnection.connect();
-        DefaultTableModel model = (DefaultTableModel) bookTable.getModel();
-        model.setRowCount(0);
 
         try {
-            String sql = "SELECT * FROM books";
+            String sql = "DELETE FROM books WHERE book_id = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
-            ResultSet rs = stmt.executeQuery();
+            stmt.setString(1, bookId);
+            int rowsAffected = stmt.executeUpdate();
 
-            while (rs.next()) {
-                int id = rs.getInt("book_id");
-                String name = rs.getString("book_name");
-                String author = rs.getString("author_name");
-                int quantity = rs.getInt("quantity");
-
-                // Add row to table
-                model.addRow(new Object[]{id, name, author, quantity});
+            if (rowsAffected > 0) {
+                javax.swing.JOptionPane.showMessageDialog(null, "Book deleted successfully.");
+                loadBooksToTable(); // Refresh table
+            } else {
+                javax.swing.JOptionPane.showMessageDialog(null, "Failed to delete book.");
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
+            javax.swing.JOptionPane.showMessageDialog(null, "Database error: " + e.getMessage(), "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
         }
     }
+}
 
-    private void clearText(){
-        book_id.setText("");
-        book_name.setText("");
-        author_name.setText("");
-        quantity.setText("");
+private void loadBooksToTable() {
+    Connection conn = DBConnection.connect();
+    DefaultTableModel model = (DefaultTableModel) bookTable.getModel();
+    model.setRowCount(0);
+    
+    try {
+        String sql = "SELECT * FROM books";
+        PreparedStatement stmt = conn.prepareStatement(sql);
+        ResultSet rs = stmt.executeQuery();
+
+        while (rs.next()) {
+            int id = rs.getInt("book_id");
+            String name = rs.getString("book_name");
+            String author = rs.getString("author_name");
+            int quantity = rs.getInt("quantity");
+
+            // Add row to table
+            model.addRow(new Object[]{id, name, author, quantity});
+        }
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+}
+
+private void clearText(){
+    book_id.setText("");
+    book_name.setText("");
+    author_name.setText("");
+    quantity.setText("");
     }
     
 
