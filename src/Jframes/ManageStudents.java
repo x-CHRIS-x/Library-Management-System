@@ -306,6 +306,7 @@ public class ManageStudents extends javax.swing.JFrame {
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         // TODO add your handling code here:
+        deleteStudent();
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
@@ -383,7 +384,47 @@ public class ManageStudents extends javax.swing.JFrame {
     }
 }
 
-    
+    private void deleteStudent() {
+        int selectedRow = studentTable.getSelectedRow();
+
+        if (selectedRow == -1) {
+            javax.swing.JOptionPane.showMessageDialog(null, "Please select a student to delete.");
+            return;
+        }
+
+        // Get the student_id from the selected row
+        String studentId = studentTable.getValueAt(selectedRow, 0).toString();
+
+        int confirm = javax.swing.JOptionPane.showConfirmDialog(
+            null,
+            "Are you sure you want to delete student with ID: " + studentId + "?",
+            "Confirm Delete",
+            javax.swing.JOptionPane.YES_NO_OPTION
+        );
+
+        if (confirm == javax.swing.JOptionPane.YES_OPTION) {
+            Connection conn = DBConnection.connect();
+
+            try {
+                String sql = "DELETE FROM students WHERE student_id = ?";
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                stmt.setString(1, studentId);
+                int rowsAffected = stmt.executeUpdate();
+
+                if (rowsAffected > 0) {
+                    javax.swing.JOptionPane.showMessageDialog(null, "Student deleted successfully.");
+                    loadStudentsToTable(); // Refresh the table
+                } else {
+                    javax.swing.JOptionPane.showMessageDialog(null, "Student Data deletion canceled.");
+                }
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+                javax.swing.JOptionPane.showMessageDialog(null, "Database error: " + e.getMessage(), "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
     private void loadStudentsToTable() {
         Connection conn = DBConnection.connect();
         DefaultTableModel model = (DefaultTableModel) studentTable.getModel(); // your JTable name
@@ -407,6 +448,7 @@ public class ManageStudents extends javax.swing.JFrame {
             e.printStackTrace();
         }
     }
+    
     
     private void clearText(){
         student_id.setText("");
