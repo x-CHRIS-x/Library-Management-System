@@ -331,13 +331,14 @@ public class ManageBooks extends javax.swing.JFrame {
     
 
 private void addBook() {
-    int id = Integer.parseInt(book_id.getText()); // You might not need to use this if you're not using book_id directly
-    String BookName = book_name.getText();
-    String Author = author_name.getText();
-    int Quantity = Integer.parseInt(quantity.getText());
+    
 
     Connection conn = DBConnection.connect();
     try {
+        int id = Integer.parseInt(book_id.getText());
+        String BookName = book_name.getText();
+        String Author = author_name.getText();
+        int Quantity = Integer.parseInt(quantity.getText());
         // Check if the book already exists
         String checkSql = "SELECT book_id, quantity FROM books WHERE book_name = ?";
         PreparedStatement checkStmt = conn.prepareStatement(checkSql);
@@ -372,14 +373,16 @@ private void addBook() {
         loadBooksToTable();
 
     } catch (SQLException e) {
-        javax.swing.JOptionPane.showMessageDialog(null, "Database Error: " + e.getMessage(), "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+        javax.swing.JOptionPane.showMessageDialog(null, "Database Error: " + e.getMessage());
+    } catch (NumberFormatException e) {
+        javax.swing.JOptionPane.showMessageDialog(null, "Invalid input! Please enter valid numbers for Book ID and Quantity.");
     }
 }
 
     private void loadBooksToTable() {
-        Connection conn = DBConnection.connect(); // Assuming you have a DBConnection class
-        DefaultTableModel model = (DefaultTableModel) bookTable.getModel(); // your JTable name
-        model.setRowCount(0); // clear existing rows
+        Connection conn = DBConnection.connect();
+        DefaultTableModel model = (DefaultTableModel) bookTable.getModel();
+        model.setRowCount(0);
 
         try {
             String sql = "SELECT * FROM books";
