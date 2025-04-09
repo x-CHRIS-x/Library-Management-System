@@ -59,46 +59,46 @@ public class ManageStudents extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jLabel1.setText("Manage Students");
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
+        jLabel1.setText("Manage Students");
 
-        jLabel2.setText("Student ID");
         jLabel2.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jLabel2.setText("Student ID");
 
-        jButton1.setText("Add");
         jButton1.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jButton1.setText("Add");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
             }
         });
 
-        jButton2.setText("Clear");
         jButton2.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jButton2.setText("Clear");
         jButton2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton2ActionPerformed(evt);
             }
         });
 
-        jButton3.setText("Delete");
         jButton3.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jButton3.setText("Delete");
         jButton3.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton3ActionPerformed(evt);
             }
         });
 
-        jButton4.setText("Edit");
         jButton4.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jButton4.setText("Edit");
         jButton4.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton4ActionPerformed(evt);
             }
         });
 
-        jButton5.setText("Back");
         jButton5.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jButton5.setText("Back");
         jButton5.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton5ActionPerformed(evt);
@@ -109,18 +109,18 @@ public class ManageStudents extends javax.swing.JFrame {
 
         jLabel5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Icons/student.png"))); // NOI18N
 
-        jLabel6.setText("Student Name");
         jLabel6.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jLabel6.setText("Student Name");
 
         jLabel7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Icons/Program.png"))); // NOI18N
 
-        jLabel8.setText("Student Program");
         jLabel8.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jLabel8.setText("Student Program");
 
         jLabel9.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Icons/student.png"))); // NOI18N
 
-        jLabel10.setText("Student Year");
         jLabel10.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jLabel10.setText("Student Year");
 
         student_program.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Bachelor of Science in Information Technology", "Bachelor of Science in Computer Science" }));
         student_program.addActionListener(new java.awt.event.ActionListener() {
@@ -266,6 +266,11 @@ public class ManageStudents extends javax.swing.JFrame {
             }
         });
         studentTable.getTableHeader().setReorderingAllowed(false);
+        studentTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                studentTableMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(studentTable);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -302,6 +307,7 @@ public class ManageStudents extends javax.swing.JFrame {
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
         // TODO add your handling code here:
+        editStudent();
     }//GEN-LAST:event_jButton4ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
@@ -323,6 +329,26 @@ public class ManageStudents extends javax.swing.JFrame {
     private void student_programActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_student_programActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_student_programActionPerformed
+
+    private void studentTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_studentTableMouseClicked
+        // TODO add your handling code here:
+        int selectedRow = studentTable.getSelectedRow();
+
+        // Check if a row is selected
+        if (selectedRow != -1) {
+            // Retrieve data from the selected row
+            String studentId = studentTable.getValueAt(selectedRow, 0).toString();
+            String studentName = studentTable.getValueAt(selectedRow, 1).toString();
+            String studentProgram = studentTable.getValueAt(selectedRow, 2).toString();
+            String studentYear = studentTable.getValueAt(selectedRow, 3).toString();
+
+            // Set the values in the corresponding fields
+            student_id.setText(studentId);
+            student_name.setText(studentName);
+            student_program.setSelectedItem(studentProgram);
+            student_year.setSelectedItem(studentYear);
+        }
+    }//GEN-LAST:event_studentTableMouseClicked
 
     /**
      * @param args the command line arguments
@@ -382,6 +408,44 @@ public class ManageStudents extends javax.swing.JFrame {
         e.printStackTrace();
         javax.swing.JOptionPane.showMessageDialog(null, "Database error: " + e.getMessage(), "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
     }
+}
+    
+    private void editStudent() {
+        Connection conn = DBConnection.connect();
+        try {
+            // Get the values from the fields
+            String studentId = student_id.getText();
+            String studentName = student_name.getText();
+            String studentProgram = student_program.getSelectedItem().toString(); // Get the selected item from JComboBox
+            String studentYear = student_year.getSelectedItem().toString(); // Get the selected item from JComboBox
+
+            // Validate the inputs
+            if (studentId.isEmpty() || studentName.isEmpty() || studentProgram.isEmpty() || studentYear.isEmpty()) {
+                javax.swing.JOptionPane.showMessageDialog(null, "Please fill in all fields.");
+                return;
+            }
+
+            // SQL query to update student details in the database
+            String sql = "UPDATE students SET student_name = ?, student_program = ?, student_year = ? WHERE student_id = ?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, studentName);
+            stmt.setString(2, studentProgram);
+            stmt.setString(3, studentYear);
+            stmt.setString(4, studentId);
+
+            // Execute the update query
+            int rowsAffected = stmt.executeUpdate();
+            if (rowsAffected > 0) {
+                javax.swing.JOptionPane.showMessageDialog(null, "Student details updated successfully!");
+            } else {
+                javax.swing.JOptionPane.showMessageDialog(null, "Student not found or no changes made.");
+            }
+
+            // Refresh the table after updating the student
+            loadStudentsToTable();
+        } catch (SQLException e) {
+            javax.swing.JOptionPane.showMessageDialog(null, "Database Error: " + e.getMessage());
+        }
 }
 
     private void deleteStudent() {
@@ -448,7 +512,6 @@ public class ManageStudents extends javax.swing.JFrame {
             e.printStackTrace();
         }
     }
-    
     
     private void clearText(){
         student_id.setText("");
