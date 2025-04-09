@@ -69,8 +69,8 @@ public class ManageBooks extends javax.swing.JFrame {
 
         book_id.setName("book_id"); // NOI18N
 
-        jButton1.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jButton1.setText("Add");
+        jButton1.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
@@ -85,8 +85,8 @@ public class ManageBooks extends javax.swing.JFrame {
             }
         });
 
-        jButton3.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jButton3.setText("Delete");
+        jButton3.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jButton3.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton3ActionPerformed(evt);
@@ -262,6 +262,11 @@ public class ManageBooks extends javax.swing.JFrame {
             }
         });
         bookTable.getTableHeader().setReorderingAllowed(false);
+        bookTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                bookTableMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(bookTable);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -298,6 +303,7 @@ public class ManageBooks extends javax.swing.JFrame {
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
         // TODO add your handling code here:
+        editBook();
     }//GEN-LAST:event_jButton4ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
@@ -315,6 +321,23 @@ public class ManageBooks extends javax.swing.JFrame {
         addBook();
         clearText();
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void bookTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bookTableMouseClicked
+        // TODO add your handling code here:
+        int selectedRow = bookTable.getSelectedRow();
+        
+        if (selectedRow != -1) {
+            String id = bookTable.getValueAt(selectedRow, 0).toString();
+            String name = bookTable.getValueAt(selectedRow, 1).toString();
+            String author = bookTable.getValueAt(selectedRow, 2).toString();
+            String qty = bookTable.getValueAt(selectedRow, 3).toString();
+
+            book_id.setText(id);
+            book_name.setText(name);
+            author_name.setText(author);
+            quantity.setText(qty);
+        }
+    }//GEN-LAST:event_bookTableMouseClicked
 
     /**
      * @param args the command line arguments
@@ -443,6 +466,45 @@ private void loadBooksToTable() {
 
     } catch (SQLException e) {
         e.printStackTrace();
+    }
+}
+
+private void editBook() {
+    String id = book_id.getText();
+    String name = book_name.getText();
+    String author = author_name.getText();
+    String qtyStr = quantity.getText();
+
+    // Input validation (optional but good)
+    if (id.isEmpty() || name.isEmpty() || author.isEmpty() || qtyStr.isEmpty()) {
+        javax.swing.JOptionPane.showMessageDialog(null, "Please fill in all fields.");
+        return;
+    }
+
+    try {
+        int qty = Integer.parseInt(qtyStr);
+
+        Connection conn = DBConnection.connect();
+        String sql = "UPDATE books SET book_name = ?, author_name = ?, quantity = ? WHERE book_id = ?";
+        PreparedStatement stmt = conn.prepareStatement(sql);
+        stmt.setString(1, name);
+        stmt.setString(2, author);
+        stmt.setInt(3, qty);
+        stmt.setString(4, id);
+
+        int rows = stmt.executeUpdate();
+        if (rows > 0) {
+            javax.swing.JOptionPane.showMessageDialog(null, "Book updated successfully!");
+            loadBooksToTable(); // refresh table
+        } else {
+            javax.swing.JOptionPane.showMessageDialog(null, "Update failed. Book not found.");
+        }
+
+    } catch (NumberFormatException e) {
+        javax.swing.JOptionPane.showMessageDialog(null, "Quantity must be a number.");
+    } catch (SQLException e) {
+        e.printStackTrace();
+        javax.swing.JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
     }
 }
 
