@@ -67,10 +67,11 @@ public class ManageBooks extends javax.swing.JFrame {
         jLabel2.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel2.setText("Book ID");
 
+        book_id.setEditable(false);
         book_id.setName("book_id"); // NOI18N
 
-        jButton1.setText("Add");
         jButton1.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jButton1.setText("Add");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
@@ -85,8 +86,8 @@ public class ManageBooks extends javax.swing.JFrame {
             }
         });
 
-        jButton3.setText("Delete");
         jButton3.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jButton3.setText("Delete");
         jButton3.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton3ActionPerformed(evt);
@@ -355,15 +356,13 @@ public class ManageBooks extends javax.swing.JFrame {
     
 
 private void addBook() {
-    
-
     Connection conn = DBConnection.connect();
     try {
-        int id = Integer.parseInt(book_id.getText());
-        String BookName = book_name.getText();
-        String Author = author_name.getText();
-        int Quantity = Integer.parseInt(quantity.getText());
-        // Check if the book already exists
+        String BookName = book_name.getText();  // Get the book name from the text field
+        String Author = author_name.getText();  // Get the author name from the text field
+        int Quantity = Integer.parseInt(quantity.getText());  // Get the quantity from the text field
+
+        // Check if the book already exists in the database based on the book name
         String checkSql = "SELECT book_id, quantity FROM books WHERE book_name = ?";
         PreparedStatement checkStmt = conn.prepareStatement(checkSql);
         checkStmt.setString(1, BookName);
@@ -374,32 +373,69 @@ private void addBook() {
             int existingQuantity = rs.getInt("quantity");
             int newQuantity = existingQuantity + Quantity;
 
+            // Update the quantity in the database
             String updateSql = "UPDATE books SET quantity = ? WHERE book_name = ?";
             PreparedStatement updateStmt = conn.prepareStatement(updateSql);
             updateStmt.setInt(1, newQuantity);
             updateStmt.setString(2, BookName);
             updateStmt.executeUpdate();
-
             javax.swing.JOptionPane.showMessageDialog(null, "Quantity updated for the book!");
         } else {
-            // If the book doesn't exist, insert a new record
+            // If the book doesn't exist, insert a new record without specifying the book_id
             String insertSql = "INSERT INTO books (book_name, author_name, quantity) VALUES (?, ?, ?)";
             PreparedStatement insertStmt = conn.prepareStatement(insertSql);
             insertStmt.setString(1, BookName);
             insertStmt.setString(2, Author);
             insertStmt.setInt(3, Quantity);
             insertStmt.executeUpdate();
-
             javax.swing.JOptionPane.showMessageDialog(null, "Book added successfully!");
         }
 
         // Refresh the table after adding or updating
         loadBooksToTable();
-
     } catch (SQLException e) {
         javax.swing.JOptionPane.showMessageDialog(null, "Database Error: " + e.getMessage());
     } catch (NumberFormatException e) {
-        javax.swing.JOptionPane.showMessageDialog(null, "Invalid input! Please enter valid numbers for Book ID and Quantity.");
+        javax.swing.JOptionPane.showMessageDialog(null, "Invalid input! Please enter valid numbers for Quantity.");
+    }
+}
+
+private void editBook() {
+    String id = book_id.getText();
+    String name = book_name.getText();
+    String author = author_name.getText();
+    String qtyStr = quantity.getText();
+
+    // Input validation (optional but good)
+    if (id.isEmpty() || name.isEmpty() || author.isEmpty() || qtyStr.isEmpty()) {
+        javax.swing.JOptionPane.showMessageDialog(null, "Please fill in all fields.");
+        return;
+    }
+
+    try {
+        int qty = Integer.parseInt(qtyStr);
+
+        Connection conn = DBConnection.connect();
+        String sql = "UPDATE books SET book_name = ?, author_name = ?, quantity = ? WHERE book_id = ?";
+        PreparedStatement stmt = conn.prepareStatement(sql);
+        stmt.setString(1, name);
+        stmt.setString(2, author);
+        stmt.setInt(3, qty);
+        stmt.setString(4, id);
+
+        int rows = stmt.executeUpdate();
+        if (rows > 0) {
+            javax.swing.JOptionPane.showMessageDialog(null, "Book updated successfully!");
+            loadBooksToTable(); // refresh table
+        } else {
+            javax.swing.JOptionPane.showMessageDialog(null, "Update failed. Book not found.");
+        }
+
+    } catch (NumberFormatException e) {
+        javax.swing.JOptionPane.showMessageDialog(null, "Quantity must be a number.");
+    } catch (SQLException e) {
+        e.printStackTrace();
+        javax.swing.JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
     }
 }
 
@@ -466,45 +502,6 @@ private void loadBooksToTable() {
 
     } catch (SQLException e) {
         e.printStackTrace();
-    }
-}
-
-private void editBook() {
-    String id = book_id.getText();
-    String name = book_name.getText();
-    String author = author_name.getText();
-    String qtyStr = quantity.getText();
-
-    // Input validation (optional but good)
-    if (id.isEmpty() || name.isEmpty() || author.isEmpty() || qtyStr.isEmpty()) {
-        javax.swing.JOptionPane.showMessageDialog(null, "Please fill in all fields.");
-        return;
-    }
-
-    try {
-        int qty = Integer.parseInt(qtyStr);
-
-        Connection conn = DBConnection.connect();
-        String sql = "UPDATE books SET book_name = ?, author_name = ?, quantity = ? WHERE book_id = ?";
-        PreparedStatement stmt = conn.prepareStatement(sql);
-        stmt.setString(1, name);
-        stmt.setString(2, author);
-        stmt.setInt(3, qty);
-        stmt.setString(4, id);
-
-        int rows = stmt.executeUpdate();
-        if (rows > 0) {
-            javax.swing.JOptionPane.showMessageDialog(null, "Book updated successfully!");
-            loadBooksToTable(); // refresh table
-        } else {
-            javax.swing.JOptionPane.showMessageDialog(null, "Update failed. Book not found.");
-        }
-
-    } catch (NumberFormatException e) {
-        javax.swing.JOptionPane.showMessageDialog(null, "Quantity must be a number.");
-    } catch (SQLException e) {
-        e.printStackTrace();
-        javax.swing.JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
     }
 }
 
