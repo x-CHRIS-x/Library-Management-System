@@ -63,7 +63,7 @@ public class Main extends javax.swing.JFrame {
         no_of_students = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
         jPanel7 = new javax.swing.JPanel();
-        jLabel9 = new javax.swing.JLabel();
+        issued_books = new javax.swing.JLabel();
         jLabel10 = new javax.swing.JLabel();
         jPanel8 = new javax.swing.JPanel();
         jLabel11 = new javax.swing.JLabel();
@@ -245,8 +245,8 @@ public class Main extends javax.swing.JFrame {
         jPanel5.setBackground(new java.awt.Color(102, 102, 0));
         jPanel5.setPreferredSize(new java.awt.Dimension(200, 150));
 
-        no_of_books.setFont(new java.awt.Font("Segoe UI", 1, 30)); // NOI18N
         no_of_books.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Icons/book cart.png"))); // NOI18N
+        no_of_books.setFont(new java.awt.Font("Segoe UI", 1, 30)); // NOI18N
 
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
         jPanel5.setLayout(jPanel5Layout);
@@ -268,8 +268,8 @@ public class Main extends javax.swing.JFrame {
         jPanel6.setBackground(new java.awt.Color(51, 204, 0));
         jPanel6.setPreferredSize(new java.awt.Dimension(200, 150));
 
-        no_of_students.setFont(new java.awt.Font("Segoe UI", 1, 30)); // NOI18N
         no_of_students.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Icons/student.png"))); // NOI18N
+        no_of_students.setFont(new java.awt.Font("Segoe UI", 1, 30)); // NOI18N
 
         javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
         jPanel6.setLayout(jPanel6Layout);
@@ -294,9 +294,8 @@ public class Main extends javax.swing.JFrame {
         jPanel7.setBackground(new java.awt.Color(255, 255, 51));
         jPanel7.setPreferredSize(new java.awt.Dimension(200, 150));
 
-        jLabel9.setFont(new java.awt.Font("Segoe UI", 1, 30)); // NOI18N
-        jLabel9.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Icons/give book.png"))); // NOI18N
-        jLabel9.setText("  7");
+        issued_books.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Icons/give book.png"))); // NOI18N
+        issued_books.setFont(new java.awt.Font("Segoe UI", 1, 30)); // NOI18N
 
         javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
         jPanel7.setLayout(jPanel7Layout);
@@ -304,14 +303,14 @@ public class Main extends javax.swing.JFrame {
             jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel7Layout.createSequentialGroup()
                 .addContainerGap(44, Short.MAX_VALUE)
-                .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(issued_books, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(40, 40, 40))
         );
         jPanel7Layout.setVerticalGroup(
             jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel7Layout.createSequentialGroup()
                 .addGap(23, 23, 23)
-                .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(issued_books, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(40, Short.MAX_VALUE))
         );
 
@@ -571,9 +570,11 @@ public class Main extends javax.swing.JFrame {
     private void displayDashboardCounts() {
         int books = getBookCount();
         int students = getStudentCount();
+        int issuedBooks = getIssuedBookCount();
 
         no_of_books.setText(String.valueOf(books));
         no_of_students.setText(String.valueOf(students));
+        issued_books.setText(String.valueOf(issuedBooks));
     }
     
     // Count total books
@@ -606,6 +607,23 @@ public class Main extends javax.swing.JFrame {
             }
         } catch (SQLException e) {
             System.out.println("Error counting students: " + e.getMessage());
+        }
+        return count;
+    }
+    
+    private int getIssuedBookCount() {
+        int count = 0;
+        Connection conn = DBConnection.connect();
+        try {
+            // Query to count books that have been issued and not returned yet
+            String sql = "SELECT COUNT(*) FROM issued_books WHERE return_date IS NULL OR return_date >= CURDATE()";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                count = rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error counting issued books: " + e.getMessage());
         }
         return count;
     }
@@ -661,6 +679,7 @@ public class Main extends javax.swing.JFrame {
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTable bookTable;
+    private javax.swing.JLabel issued_books;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
@@ -680,7 +699,6 @@ public class Main extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel8;
-    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
