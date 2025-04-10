@@ -600,6 +600,24 @@ public class IssueBook extends javax.swing.JFrame {
         return false; // Book is either not issued or already returned
     }
     
+    private boolean hasStudentReachedBookLimit(String studentID) {
+        int issuedBooksCount = 0;
+        try (Connection conn = DBConnection.connect()) {
+            // Query to count only books that have not been returned (return_date is null or in the future)
+            String sql = "SELECT COUNT(*) FROM issued_books WHERE student_id = ? AND (return_date IS NULL OR return_date >= CURDATE())";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, studentID);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                issuedBooksCount = rs.getInt(1); // Get the count of currently issued books
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return issuedBooksCount >= 5; // If count is 5 or more, return true (max 5 books)
+    }
+    
     private void Issue_Book() {
         // Get student ID and book ID from the text fields
         String studentID = student_id.getText(); // Get student ID
@@ -631,6 +649,12 @@ public class IssueBook extends javax.swing.JFrame {
             issue_date.setDate(null);
             return_date.setDate(null);
             return; // Stop the process if return date is before issue date
+        }
+        
+        // Check if the student has already issued 5 books
+        if (hasStudentReachedBookLimit(studentID)) {
+            javax.swing.JOptionPane.showMessageDialog(this, "This student has already issued the maximum allowed books (5).");
+            return;
         }
         
         if (isBookAlreadyIssued(studentID, bookID)) {
