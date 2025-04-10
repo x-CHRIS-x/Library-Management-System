@@ -12,6 +12,7 @@ import Database.DBConnection;
 import java.sql.PreparedStatement;
 import java.sql.*;
 import java.time.LocalDate;
+import java.sql.Date;
 
 /**
  *
@@ -508,7 +509,6 @@ public class IssueBook extends javax.swing.JFrame {
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         // TODO add your handling code here:
         Issue_Book();
-        clearText();
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
@@ -578,21 +578,6 @@ public class IssueBook extends javax.swing.JFrame {
             javax.swing.JOptionPane.showMessageDialog(this, "Error fetching student details: " + e.getMessage());
         }
 }
-    
-    
-
-    private void updateBookQuantity(String bookID) {
-        // Reduce the book quantity by 1 after issuing
-        try (Connection conn = DBConnection.connect()) {
-            String sql = "UPDATE books SET quantity = quantity - 1 WHERE book_id = ?";
-            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setString(1, bookID);
-                stmt.executeUpdate();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 
     private void Issue_Book() {
         // Get student ID and book ID from the text fields
@@ -619,6 +604,14 @@ public class IssueBook extends javax.swing.JFrame {
         java.sql.Date issueDate = java.sql.Date.valueOf(issueLocalDate);
         java.sql.Date returnDate = java.sql.Date.valueOf(returnLocalDate);
 
+        // Check if the return date is before the issue date
+        if (returnDate.before(issueDate)) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Return date cannot be before issue date.");
+            issue_date.setDate(null);
+            return_date.setDate(null);
+            return; // Stop the process if return date is before issue date
+        }
+        
         // Insert the issue record into the database
         try (Connection conn = DBConnection.connect()) {
             // Prepare the SQL query to insert the book issue details
@@ -644,6 +637,20 @@ public class IssueBook extends javax.swing.JFrame {
         } catch (SQLException e) {
             e.printStackTrace();
             javax.swing.JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
+        }
+        clearText();
+    }
+    
+    private void updateBookQuantity(String bookID) {
+        // Reduce the book quantity by 1 after issuing
+        try (Connection conn = DBConnection.connect()) {
+            String sql = "UPDATE books SET quantity = quantity - 1 WHERE book_id = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, bookID);
+                stmt.executeUpdate();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
     
