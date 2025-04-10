@@ -6,6 +6,12 @@ package Jframes;
 
 import javax.swing.JOptionPane;
 import com.formdev.flatlaf.FlatDarculaLaf;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import Database.DBConnection;
+import java.sql.PreparedStatement;
+import java.sql.*;
 
 /**
  *
@@ -18,6 +24,7 @@ public class Main extends javax.swing.JFrame {
      */
     public Main() {
         initComponents();
+        displayDashboardCounts();
     }
 
     /**
@@ -47,9 +54,9 @@ public class Main extends javax.swing.JFrame {
         jPanel4 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         jPanel5 = new javax.swing.JPanel();
-        jLabel6 = new javax.swing.JLabel();
+        no_of_books = new javax.swing.JLabel();
         jPanel6 = new javax.swing.JPanel();
-        jLabel7 = new javax.swing.JLabel();
+        no_of_students = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
         jPanel7 = new javax.swing.JPanel();
         jLabel9 = new javax.swing.JLabel();
@@ -234,9 +241,8 @@ public class Main extends javax.swing.JFrame {
         jPanel5.setBackground(new java.awt.Color(102, 102, 0));
         jPanel5.setPreferredSize(new java.awt.Dimension(200, 150));
 
-        jLabel6.setFont(new java.awt.Font("Segoe UI", 1, 30)); // NOI18N
-        jLabel6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Icons/book cart.png"))); // NOI18N
-        jLabel6.setText("  7");
+        no_of_books.setFont(new java.awt.Font("Segoe UI", 1, 30)); // NOI18N
+        no_of_books.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Icons/book cart.png"))); // NOI18N
 
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
         jPanel5.setLayout(jPanel5Layout);
@@ -244,23 +250,22 @@ public class Main extends javax.swing.JFrame {
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
                 .addContainerGap(44, Short.MAX_VALUE)
-                .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(no_of_books, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(40, 40, 40))
         );
         jPanel5Layout.setVerticalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel5Layout.createSequentialGroup()
                 .addGap(23, 23, 23)
-                .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(no_of_books, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(40, Short.MAX_VALUE))
         );
 
         jPanel6.setBackground(new java.awt.Color(51, 204, 0));
         jPanel6.setPreferredSize(new java.awt.Dimension(200, 150));
 
-        jLabel7.setFont(new java.awt.Font("Segoe UI", 1, 30)); // NOI18N
-        jLabel7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Icons/student.png"))); // NOI18N
-        jLabel7.setText("  7");
+        no_of_students.setFont(new java.awt.Font("Segoe UI", 1, 30)); // NOI18N
+        no_of_students.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Icons/student.png"))); // NOI18N
 
         javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
         jPanel6.setLayout(jPanel6Layout);
@@ -268,14 +273,14 @@ public class Main extends javax.swing.JFrame {
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel6Layout.createSequentialGroup()
                 .addContainerGap(44, Short.MAX_VALUE)
-                .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(no_of_students, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(40, 40, 40))
         );
         jPanel6Layout.setVerticalGroup(
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel6Layout.createSequentialGroup()
                 .addGap(23, 23, 23)
-                .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(no_of_students, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(40, Short.MAX_VALUE))
         );
 
@@ -558,6 +563,48 @@ public class Main extends javax.swing.JFrame {
             }
         });
     }
+    
+    private void displayDashboardCounts() {
+        int books = getBookCount();
+        int students = getStudentCount();
+
+        no_of_books.setText(String.valueOf(books));
+        no_of_students.setText(String.valueOf(students));
+    }
+    
+    // Count total books
+    private int getBookCount() {
+        int count = 0;
+        Connection conn = DBConnection.connect();
+        try {
+            String sql = "SELECT COUNT(*) FROM books";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                count = rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error counting books: " + e.getMessage());
+        }
+        return count;
+    }
+
+    // Count total students
+    private int getStudentCount() {
+        int count = 0;
+        Connection conn = DBConnection.connect();
+        try {
+            String sql = "SELECT COUNT(*) FROM students";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                count = rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error counting students: " + e.getMessage());
+        }
+        return count;
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
@@ -578,8 +625,6 @@ public class Main extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
-    private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
@@ -594,5 +639,7 @@ public class Main extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTable jTable1;
     private javax.swing.JTable jTable2;
+    private javax.swing.JLabel no_of_books;
+    private javax.swing.JLabel no_of_students;
     // End of variables declaration//GEN-END:variables
 }

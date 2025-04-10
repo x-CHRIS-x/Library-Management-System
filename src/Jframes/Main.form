@@ -425,7 +425,7 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="1" attributes="0">
                       <EmptySpace pref="44" max="32767" attributes="0"/>
-                      <Component id="jLabel6" min="-2" pref="116" max="-2" attributes="0"/>
+                      <Component id="no_of_books" min="-2" pref="116" max="-2" attributes="0"/>
                       <EmptySpace min="-2" pref="40" max="-2" attributes="0"/>
                   </Group>
               </Group>
@@ -434,14 +434,14 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace min="-2" pref="23" max="-2" attributes="0"/>
-                      <Component id="jLabel6" min="-2" pref="87" max="-2" attributes="0"/>
+                      <Component id="no_of_books" min="-2" pref="87" max="-2" attributes="0"/>
                       <EmptySpace pref="40" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
           </Layout>
           <SubComponents>
-            <Component class="javax.swing.JLabel" name="jLabel6">
+            <Component class="javax.swing.JLabel" name="no_of_books">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Segoe UI" size="30" style="1"/>
@@ -449,7 +449,6 @@
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
                   <Image iconType="3" name="/Icons/book cart.png"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="  7"/>
               </Properties>
             </Component>
           </SubComponents>
@@ -469,7 +468,7 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="1" attributes="0">
                       <EmptySpace pref="44" max="32767" attributes="0"/>
-                      <Component id="jLabel7" min="-2" pref="116" max="-2" attributes="0"/>
+                      <Component id="no_of_students" min="-2" pref="116" max="-2" attributes="0"/>
                       <EmptySpace min="-2" pref="40" max="-2" attributes="0"/>
                   </Group>
               </Group>
@@ -478,14 +477,14 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace min="-2" pref="23" max="-2" attributes="0"/>
-                      <Component id="jLabel7" min="-2" pref="87" max="-2" attributes="0"/>
+                      <Component id="no_of_students" min="-2" pref="87" max="-2" attributes="0"/>
                       <EmptySpace pref="40" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
           </Layout>
           <SubComponents>
-            <Component class="javax.swing.JLabel" name="jLabel7">
+            <Component class="javax.swing.JLabel" name="no_of_students">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Segoe UI" size="30" style="1"/>
@@ -493,7 +492,6 @@
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
                   <Image iconType="3" name="/Icons/student.png"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="  7"/>
               </Properties>
             </Component>
           </SubComponents>
