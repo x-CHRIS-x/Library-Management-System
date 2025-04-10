@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import Database.DBConnection;
 import java.sql.PreparedStatement;
 import java.sql.*;
+import java.time.LocalDate;
 
 /**
  *
@@ -71,8 +72,8 @@ public class IssueBook extends javax.swing.JFrame {
         jLabel33 = new javax.swing.JLabel();
         jLabel35 = new javax.swing.JLabel();
         jLabel38 = new javax.swing.JLabel();
-        datePicker1 = new com.github.lgooddatepicker.components.DatePicker();
-        datePicker2 = new com.github.lgooddatepicker.components.DatePicker();
+        issue_date = new com.github.lgooddatepicker.components.DatePicker();
+        return_date = new com.github.lgooddatepicker.components.DatePicker();
         jLabel36 = new javax.swing.JLabel();
         jLabel37 = new javax.swing.JLabel();
         student_id = new javax.swing.JTextField();
@@ -415,14 +416,14 @@ public class IssueBook extends javax.swing.JFrame {
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel35)
                             .addComponent(jLabel33)
-                            .addComponent(datePicker1, javax.swing.GroupLayout.PREFERRED_SIZE, 252, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(issue_date, javax.swing.GroupLayout.PREFERRED_SIZE, 252, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(student_id, javax.swing.GroupLayout.PREFERRED_SIZE, 252, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel38)
                             .addGroup(jPanel3Layout.createSequentialGroup()
                                 .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(jButton3))
-                            .addComponent(datePicker2, javax.swing.GroupLayout.PREFERRED_SIZE, 257, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addComponent(return_date, javax.swing.GroupLayout.PREFERRED_SIZE, 257, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addGap(162, 162, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
@@ -447,7 +448,7 @@ public class IssueBook extends javax.swing.JFrame {
                         .addGap(9, 9, 9)
                         .addComponent(jLabel35, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
-                        .addComponent(datePicker1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(issue_date, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addGap(44, 44, 44)
                         .addComponent(jLabel37)))
@@ -456,7 +457,7 @@ public class IssueBook extends javax.swing.JFrame {
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jLabel38, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(datePicker2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(return_date, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jLabel31))
                 .addGap(50, 50, 50)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -506,6 +507,8 @@ public class IssueBook extends javax.swing.JFrame {
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         // TODO add your handling code here:
+        Issue_Book();
+        clearText();
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
@@ -576,6 +579,74 @@ public class IssueBook extends javax.swing.JFrame {
         }
 }
     
+    
+
+    private void updateBookQuantity(String bookID) {
+        // Reduce the book quantity by 1 after issuing
+        try (Connection conn = DBConnection.connect()) {
+            String sql = "UPDATE books SET quantity = quantity - 1 WHERE book_id = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, bookID);
+                stmt.executeUpdate();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void Issue_Book() {
+        // Get student ID and book ID from the text fields
+        String studentID = student_id.getText(); // Get student ID
+        String bookID = book_id.getText(); // Get selected book ID
+
+        // Get issue and return dates from the date pickers
+        LocalDate issueLocalDate = issue_date.getDate(); // Get the issue date from the JDatePicker
+        LocalDate returnLocalDate = return_date.getDate(); // Get the return date from the JDatePicker
+
+        // Check if the student and book fields are valid
+        if (studentID.isEmpty() || bookID.isEmpty()) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Please select both a student and a book.");
+            return;
+        }
+
+        // Check if the dates are selected
+        if (issueLocalDate == null || returnLocalDate == null) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Please select both issue and return dates.");
+            return;
+        }
+
+        // Convert LocalDate to java.sql.Date
+        java.sql.Date issueDate = java.sql.Date.valueOf(issueLocalDate);
+        java.sql.Date returnDate = java.sql.Date.valueOf(returnLocalDate);
+
+        // Insert the issue record into the database
+        try (Connection conn = DBConnection.connect()) {
+            // Prepare the SQL query to insert the book issue details
+            String sql = "INSERT INTO issued_books (student_id, book_id, issue_date, return_date) VALUES (?, ?, ?, ?)";
+
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, studentID);  // Set student ID
+                stmt.setString(2, bookID);     // Set book ID
+                stmt.setDate(3, issueDate);    // Set issue date (converted to SQL date)
+                stmt.setDate(4, returnDate);   // Set return date (converted to SQL date)
+
+                // Execute the update
+                int rowsAffected = stmt.executeUpdate();
+
+                if (rowsAffected > 0) {
+                    javax.swing.JOptionPane.showMessageDialog(this, "Book issued successfully!");
+                    // Update the book quantity after issuing
+                    updateBookQuantity(bookID); // This will decrease the quantity in the database
+                } else {
+                    javax.swing.JOptionPane.showMessageDialog(this, "Failed to issue book.");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            javax.swing.JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
+        }
+    }
+    
     private void clearText(){
         book_id.setText("");
         book_name.setText("");
@@ -588,6 +659,9 @@ public class IssueBook extends javax.swing.JFrame {
         student_program.setText("");
         student_year.setText("");
         
+        issue_date.setDate(null);
+        return_date.setDate(null);
+        
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -595,8 +669,7 @@ public class IssueBook extends javax.swing.JFrame {
     private javax.swing.JLabel book_id;
     private javax.swing.JLabel book_name;
     private javax.swing.JLabel book_quantity;
-    private com.github.lgooddatepicker.components.DatePicker datePicker1;
-    private com.github.lgooddatepicker.components.DatePicker datePicker2;
+    private com.github.lgooddatepicker.components.DatePicker issue_date;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
@@ -631,6 +704,7 @@ public class IssueBook extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
+    private com.github.lgooddatepicker.components.DatePicker return_date;
     private javax.swing.JTextField student_id;
     private javax.swing.JLabel student_name;
     private javax.swing.JLabel student_program;
