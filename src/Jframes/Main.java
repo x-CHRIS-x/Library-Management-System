@@ -12,6 +12,8 @@ import java.sql.SQLException;
 import Database.DBConnection;
 import java.sql.PreparedStatement;
 import java.sql.*;
+import javax.swing.table.DefaultTableModel;
+
 
 /**
  *
@@ -25,6 +27,8 @@ public class Main extends javax.swing.JFrame {
     public Main() {
         initComponents();
         displayDashboardCounts();
+        loadStudentsToTable();
+        loadBooksToTable();
     }
 
     /**
@@ -66,9 +70,9 @@ public class Main extends javax.swing.JFrame {
         jLabel12 = new javax.swing.JLabel();
         jLabel13 = new javax.swing.JLabel();
         jScrollPane2 = new javax.swing.JScrollPane();
-        jTable2 = new javax.swing.JTable();
+        studentTable = new javax.swing.JTable();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        bookTable = new javax.swing.JTable();
         jLabel14 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -344,7 +348,7 @@ public class Main extends javax.swing.JFrame {
         jLabel13.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jLabel13.setText("Student Details");
 
-        jTable2.setModel(new javax.swing.table.DefaultTableModel(
+        studentTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -363,10 +367,10 @@ public class Main extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
-        jTable2.getTableHeader().setReorderingAllowed(false);
-        jScrollPane2.setViewportView(jTable2);
+        studentTable.getTableHeader().setReorderingAllowed(false);
+        jScrollPane2.setViewportView(studentTable);
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        bookTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -385,8 +389,8 @@ public class Main extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
-        jTable1.getTableHeader().setReorderingAllowed(false);
-        jScrollPane1.setViewportView(jTable1);
+        bookTable.getTableHeader().setReorderingAllowed(false);
+        jScrollPane1.setViewportView(bookTable);
 
         jLabel14.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jLabel14.setText("Book Details");
@@ -605,8 +609,58 @@ public class Main extends javax.swing.JFrame {
         }
         return count;
     }
+    
+    private void loadStudentsToTable() {
+        Connection conn = DBConnection.connect();
+        DefaultTableModel model = (DefaultTableModel) studentTable.getModel(); // your JTable name
+        model.setRowCount(0);
 
+        try {
+            String sql = "SELECT * FROM students";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                String id = rs.getString("student_id");
+                String name = rs.getString("student_name");
+                String program = rs.getString("student_program");
+                String year = rs.getString("student_year");
+
+                model.addRow(new Object[]{id, name, program, year});
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadBooksToTable() {
+        Connection conn = DBConnection.connect();
+        DefaultTableModel model = (DefaultTableModel) bookTable.getModel();
+        model.setRowCount(0);
+
+        try {
+            String sql = "SELECT * FROM books";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                int id = rs.getInt("book_id");
+                String name = rs.getString("book_name");
+                String author = rs.getString("author_name");
+                int quantity = rs.getInt("quantity");
+
+                // Add row to table
+                model.addRow(new Object[]{id, name, author, quantity});
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+}
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JTable bookTable;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
@@ -637,9 +691,8 @@ public class Main extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel8;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTable jTable1;
-    private javax.swing.JTable jTable2;
     private javax.swing.JLabel no_of_books;
     private javax.swing.JLabel no_of_students;
+    private javax.swing.JTable studentTable;
     // End of variables declaration//GEN-END:variables
 }
