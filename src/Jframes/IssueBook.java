@@ -579,6 +579,27 @@ public class IssueBook extends javax.swing.JFrame {
         }
 }
 
+    private boolean isBookAlreadyIssued(String studentID, String bookID) {
+        try (Connection conn = DBConnection.connect()) {
+            // SQL query to check if the student already has the book issued
+            String query = "SELECT * FROM issued_books WHERE student_id = ? AND book_id = ? AND return_date >= CURDATE()";
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setString(1, studentID); // Set student ID
+                stmt.setString(2, bookID);    // Set book ID
+
+                ResultSet rs = stmt.executeQuery();
+                // If the student already has the book and the return date is not passed, return true
+                if (rs.next()) {
+                    return true; // Book is already issued and not returned yet
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            javax.swing.JOptionPane.showMessageDialog(this, "Error checking issued book: " + e.getMessage());
+        }
+        return false; // Book is either not issued or already returned
+    }
+    
     private void Issue_Book() {
         // Get student ID and book ID from the text fields
         String studentID = student_id.getText(); // Get student ID
@@ -610,6 +631,12 @@ public class IssueBook extends javax.swing.JFrame {
             issue_date.setDate(null);
             return_date.setDate(null);
             return; // Stop the process if return date is before issue date
+        }
+        
+        if (isBookAlreadyIssued(studentID, bookID)) {
+            javax.swing.JOptionPane.showMessageDialog(this, "This student has already been issued this book. Please return the book before issuing it again.");
+            clearText();
+            return; // Prevent issuing if the book is already issued to the student
         }
         
         // Insert the issue record into the database
