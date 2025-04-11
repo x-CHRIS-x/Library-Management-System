@@ -13,6 +13,7 @@ import java.sql.PreparedStatement;
 import java.sql.*;
 import java.time.LocalDate;
 import java.sql.Date;
+import com.github.lgooddatepicker.components.DatePickerSettings;
 
 /**
  *
@@ -25,7 +26,16 @@ public class IssueBook extends javax.swing.JFrame {
      */
     public IssueBook() {
         initComponents();
-        issue_date.setDate(LocalDate.now());
+        issue_date.setDate(LocalDate.now()); // This auto set the issue date to the current date
+        return_date.setDate(LocalDate.now().plusDays(6)); // This auto set the return date to be 7 days after the issue date
+        
+        // This limits the days a book can be borrowed
+        DatePickerSettings returnDateSettings = return_date.getSettings();
+        returnDateSettings.setVetoPolicy((LocalDate date) -> {
+        LocalDate issue = issue_date.getDate();
+        if (issue == null) return false;
+        return !date.isBefore(issue) && !date.isAfter(issue.plusDays(13));
+    });
 
     }
 
