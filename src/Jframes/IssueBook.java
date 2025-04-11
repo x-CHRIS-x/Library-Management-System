@@ -25,6 +25,8 @@ public class IssueBook extends javax.swing.JFrame {
      */
     public IssueBook() {
         initComponents();
+        issue_date.setDate(LocalDate.now());
+
     }
 
     /**
@@ -624,7 +626,7 @@ public class IssueBook extends javax.swing.JFrame {
         String bookID = book_id.getText(); // Get selected book ID
 
         // Get issue and return dates from the date pickers
-        LocalDate issueLocalDate = issue_date.getDate(); // Get the issue date from the JDatePicker
+        LocalDate issueLocalDate = LocalDate.now(); // Get the issue date from the JDatePicker
         LocalDate returnLocalDate = return_date.getDate(); // Get the return date from the JDatePicker
 
         // Check if the student and book fields are valid
