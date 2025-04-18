@@ -45,8 +45,8 @@ public class SelectBook extends javax.swing.JDialog {
         searchTextField = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
-        bookTable = new javax.swing.JTable();
-        jButton2 = new javax.swing.JButton();
+        issuedBooksTable = new javax.swing.JTable();
+        selectButton = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -71,7 +71,7 @@ public class SelectBook extends javax.swing.JDialog {
             }
         });
 
-        bookTable.setModel(new javax.swing.table.DefaultTableModel(
+        issuedBooksTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -97,13 +97,13 @@ public class SelectBook extends javax.swing.JDialog {
                 return canEdit [columnIndex];
             }
         });
-        bookTable.getTableHeader().setReorderingAllowed(false);
-        bookTable.addMouseListener(new java.awt.event.MouseAdapter() {
+        issuedBooksTable.getTableHeader().setReorderingAllowed(false);
+        issuedBooksTable.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                bookTableMouseClicked(evt);
+                issuedBooksTableMouseClicked(evt);
             }
         });
-        jScrollPane1.setViewportView(bookTable);
+        jScrollPane1.setViewportView(issuedBooksTable);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -132,12 +132,12 @@ public class SelectBook extends javax.swing.JDialog {
                 .addContainerGap())
         );
 
-        jButton2.setBackground(new java.awt.Color(110, 110, 110));
-        jButton2.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        jButton2.setText("Select Book");
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
+        selectButton.setBackground(new java.awt.Color(110, 110, 110));
+        selectButton.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        selectButton.setText("Select Book");
+        selectButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                selectButtonActionPerformed(evt);
             }
         });
 
@@ -159,7 +159,7 @@ public class SelectBook extends javax.swing.JDialog {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jButton3)
                 .addGap(18, 18, 18)
-                .addComponent(jButton2)
+                .addComponent(selectButton)
                 .addGap(24, 24, 24))
         );
         layout.setVerticalGroup(
@@ -168,7 +168,7 @@ public class SelectBook extends javax.swing.JDialog {
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton2)
+                    .addComponent(selectButton)
                     .addComponent(jButton3))
                 .addGap(0, 21, Short.MAX_VALUE))
         );
@@ -181,17 +181,17 @@ public class SelectBook extends javax.swing.JDialog {
         // TODO add your handling code here:
     }//GEN-LAST:event_searchTextFieldActionPerformed
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+    private void selectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectButtonActionPerformed
         // TODO add your handling code here:
         // Get selected row from the table
-        int selectedRow = bookTable.getSelectedRow();
+        int selectedRow = issuedBooksTable.getSelectedRow();
 
         if (selectedRow != -1) {
             // Get the book ID and other details from the selected row
-            String bookId = bookTable.getValueAt(selectedRow, 0).toString();
-            String bookName = bookTable.getValueAt(selectedRow, 1).toString();
-            String author = bookTable.getValueAt(selectedRow, 2).toString();
-            String quantity = bookTable.getValueAt(selectedRow, 3).toString();
+            String bookId = issuedBooksTable.getValueAt(selectedRow, 0).toString();
+            String bookName = issuedBooksTable.getValueAt(selectedRow, 1).toString();
+            String author = issuedBooksTable.getValueAt(selectedRow, 2).toString();
+            String quantity = issuedBooksTable.getValueAt(selectedRow, 3).toString();
 
             // Pass the selected book details back to the main form (assuming you have a method to set the book info)
             issueBookForm.setSelectedBook(bookId, bookName, author, quantity);
@@ -201,7 +201,7 @@ public class SelectBook extends javax.swing.JDialog {
         } else {
             javax.swing.JOptionPane.showMessageDialog(this, "Please select a book from the table.");
         }
-    }//GEN-LAST:event_jButton2ActionPerformed
+    }//GEN-LAST:event_selectButtonActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
@@ -214,9 +214,9 @@ public class SelectBook extends javax.swing.JDialog {
         this.dispose();
     }//GEN-LAST:event_jButton3ActionPerformed
 
-    private void bookTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bookTableMouseClicked
+    private void issuedBooksTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_issuedBooksTableMouseClicked
         // TODO add your handling code here:
-    }//GEN-LAST:event_bookTableMouseClicked
+    }//GEN-LAST:event_issuedBooksTableMouseClicked
 
     /**
      * @param args the command line arguments
@@ -263,7 +263,7 @@ public class SelectBook extends javax.swing.JDialog {
         ResultSet rs = stmt.executeQuery();
 
         // Clear the table before adding new search results
-        DefaultTableModel model = (DefaultTableModel) bookTable.getModel();
+        DefaultTableModel model = (DefaultTableModel) issuedBooksTable.getModel();
         model.setRowCount(0);  // Clear table
 
         // Loop through the results and add them to the table
@@ -281,7 +281,7 @@ public class SelectBook extends javax.swing.JDialog {
 
     private void loadBooksToTable() {
         Connection conn = DBConnection.connect();
-        DefaultTableModel model = (DefaultTableModel) bookTable.getModel();
+        DefaultTableModel model = (DefaultTableModel) issuedBooksTable.getModel();
         model.setRowCount(0);
 
         try {
@@ -305,13 +305,13 @@ public class SelectBook extends javax.swing.JDialog {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JTable bookTable;
+    private javax.swing.JTable issuedBooksTable;
     private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextField searchTextField;
+    private javax.swing.JButton selectButton;
     // End of variables declaration//GEN-END:variables
 }
