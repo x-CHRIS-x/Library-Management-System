@@ -132,18 +132,18 @@ public class SelectBook extends javax.swing.JDialog {
                 .addContainerGap())
         );
 
+        selectButton.setText("Select Book");
         selectButton.setBackground(new java.awt.Color(110, 110, 110));
         selectButton.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        selectButton.setText("Select Book");
         selectButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 selectButtonActionPerformed(evt);
             }
         });
 
+        jButton3.setText("Cancel");
         jButton3.setBackground(new java.awt.Color(110, 110, 110));
         jButton3.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        jButton3.setText("Cancel");
         jButton3.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton3ActionPerformed(evt);

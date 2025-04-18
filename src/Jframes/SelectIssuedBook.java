@@ -131,9 +131,6 @@ public class SelectIssuedBook extends javax.swing.JDialog {
             }
         });
         jScrollPane1.setViewportView(issuedTable);
-        if (issuedTable.getColumnModel().getColumnCount() > 0) {
-            issuedTable.getColumnModel().getColumn(7).setCellRenderer(null);
-        }
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -175,6 +172,7 @@ public class SelectIssuedBook extends javax.swing.JDialog {
         );
 
         pack();
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void searchTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchTextFieldActionPerformed
