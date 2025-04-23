@@ -573,6 +573,8 @@ public class Main extends javax.swing.JFrame {
     }
     
     private void displayDashboardCounts() {
+        updateOverdueStatus();
+        
         int books = getBookCount();
         int students = getStudentCount();
         int issuedBooks = getIssuedBookCount();
@@ -634,6 +636,20 @@ public class Main extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "Error counting issued books: " + e.getMessage());
         }
         return count;
+    }
+    
+    private void updateOverdueStatus() {
+        String query = """
+            UPDATE issued_books
+            SET status = 'Overdue'
+            WHERE status = 'Active' AND return_date < CURDATE()
+        """;
+        try (Connection conn = DBConnection.connect();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.executeUpdate();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Error updating overdue statuses: " + e.getMessage());
+        }
     }
     
     private int getOverdueBookCount() {
