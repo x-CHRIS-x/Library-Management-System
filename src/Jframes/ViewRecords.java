@@ -20,6 +20,7 @@ import Database.DBConnection;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.text.SimpleDateFormat;
+import javax.swing.table.TableColumn;
 
 public class ViewRecords extends javax.swing.JFrame {
 
@@ -272,6 +273,25 @@ public class ViewRecords extends javax.swing.JFrame {
                 model.addRow(row);
             }
 
+            TableColumn statusCol = ViewRecords.getColumnModel().getColumn(7); 
+            statusCol.setCellRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                boolean isSelected, boolean hasFocus, int row, int column) {
+
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+                if ("Overdue".equalsIgnoreCase(String.valueOf(value))) {
+                    c.setForeground(Color.RED);
+                } else if ("Active".equalsIgnoreCase(String.valueOf(value))) {
+                    c.setForeground(new Color(40, 167, 69));
+                } else {
+                    c.setForeground(new Color(33, 150, 243));
+                }
+                return c;
+            }
+        });
+            
             rs.close();
             pst.close();
             conn.close();

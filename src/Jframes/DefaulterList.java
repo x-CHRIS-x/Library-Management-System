@@ -20,6 +20,8 @@ import Database.DBConnection;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.text.SimpleDateFormat;
+import javax.swing.table.TableColumn;
+
 
 public class DefaulterList extends javax.swing.JFrame {
 
@@ -83,6 +85,9 @@ public class DefaulterList extends javax.swing.JFrame {
             }
         });
         jScrollPane1.setViewportView(defaulterTable);
+        if (defaulterTable.getColumnModel().getColumnCount() > 0) {
+            defaulterTable.getColumnModel().getColumn(7).setCellRenderer(null);
+        }
 
         Back.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         Back.setText("BACK");
@@ -230,7 +235,7 @@ public class DefaulterList extends javax.swing.JFrame {
                 status
             });
         }
-
+        
         // Table model
         DefaultTableModel model = (DefaultTableModel) defaulterTable.getModel();
         model.setRowCount(0); // Clear table
@@ -238,6 +243,25 @@ public class DefaulterList extends javax.swing.JFrame {
         for (Object[] row : rows) {
             model.addRow(row);
         }
+        
+        TableColumn statusCol = defaulterTable.getColumnModel().getColumn(7); 
+        statusCol.setCellRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                boolean isSelected, boolean hasFocus, int row, int column) {
+
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+                if ("Overdue".equalsIgnoreCase(String.valueOf(value))) {
+                    c.setForeground(Color.RED);
+                } else if ("Active".equalsIgnoreCase(String.valueOf(value))) {
+                    c.setForeground(new Color(40, 167, 69));
+                } else {
+                    c.setForeground(new Color(33, 150, 243));
+                }
+                return c;
+            }
+        });
 
         rs.close();
         pst.close();

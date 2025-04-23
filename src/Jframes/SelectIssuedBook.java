@@ -14,6 +14,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import Database.DBConnection;
+import java.awt.Color;
+import java.awt.Component;
 import java.sql.PreparedStatement;
 import java.sql.*;
 import javax.swing.table.DefaultTableModel;
@@ -23,6 +25,9 @@ import java.text.ParseException;
 
 import java.time.LocalDate;
 import java.text.SimpleDateFormat;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableColumn;
 
 
 public class SelectIssuedBook extends javax.swing.JDialog {
@@ -324,6 +329,26 @@ public class SelectIssuedBook extends javax.swing.JDialog {
                 status
             });
         }
+        
+            TableColumn statusCol = issuedTable.getColumnModel().getColumn(7); 
+            statusCol.setCellRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                boolean isSelected, boolean hasFocus, int row, int column) {
+
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+                if ("Overdue".equalsIgnoreCase(String.valueOf(value))) {
+                    c.setForeground(Color.RED);
+                } else if ("Active".equalsIgnoreCase(String.valueOf(value))) {
+                    c.setForeground(new Color(40, 167, 69));
+                } else {
+                    c.setForeground(new Color(33, 150, 243));
+                }
+                return c;
+            }
+        });
+        
     } catch (Exception e) {
         javax.swing.JOptionPane.showMessageDialog(this, "Error loading data: " + e.getMessage());
         e.printStackTrace();
