@@ -15,6 +15,19 @@ import java.time.LocalDate;
 import java.sql.Date;
 import com.github.lgooddatepicker.components.DatePickerSettings;
 
+import com.lowagie.text.Document;
+import com.lowagie.text.DocumentException;
+import com.lowagie.text.Element;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.Font;
+import com.lowagie.text.FontFactory;
+import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.PdfWriter;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.awt.Desktop;
+import java.io.File;
+
 /**
  *
  * @author John Chris Ledama 
@@ -594,7 +607,7 @@ public class IssueBook extends javax.swing.JFrame {
     private boolean isBookAlreadyIssued(String studentID, String bookID) {
         try (Connection conn = DBConnection.connect()) {
             // SQL query to check if the student already has the book issued
-            String query = "SELECT * FROM issued_books WHERE student_id = ? AND book_id = ? AND return_date >= CURDATE()";
+            String query = "SELECT * FROM issued_books WHERE student_id = ? AND book_id = ? AND status = 'Active'";
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
                 stmt.setString(1, studentID); // Set student ID
                 stmt.setString(2, bookID);    // Set book ID
@@ -616,7 +629,7 @@ public class IssueBook extends javax.swing.JFrame {
         int issuedBooksCount = 0;
         try (Connection conn = DBConnection.connect()) {
             // Query to count only books that have not been returned (return_date is null or in the future)
-            String sql = "SELECT COUNT(*) FROM issued_books WHERE student_id = ? AND (return_date IS NULL OR return_date >= CURDATE())";
+            String sql = "SELECT COUNT(*) FROM issued_books WHERE student_id = ? AND status = 'Active'";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, studentID);
             ResultSet rs = stmt.executeQuery();
@@ -629,6 +642,22 @@ public class IssueBook extends javax.swing.JFrame {
         }
         return issuedBooksCount >= 5; // If count is 5 or more, return true (max 5 books)
     }
+    
+    private int getLatestIssueId() {
+    int latestId = -1;
+    try (Connection conn = DBConnection.connect()) {
+        String sql = "SELECT MAX(issue_id) AS latest_id FROM issued_books";
+        PreparedStatement stmt = conn.prepareStatement(sql);
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) {
+            latestId = rs.getInt("latest_id");
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+        javax.swing.JOptionPane.showMessageDialog(this, "Error fetching latest issue ID: " + e.getMessage());
+    }
+    return latestId;
+}
     
     private void Issue_Book() {
         // Get student ID and book ID from the text fields
@@ -693,6 +722,19 @@ public class IssueBook extends javax.swing.JFrame {
                     javax.swing.JOptionPane.showMessageDialog(this, "Book issued successfully!");
                     // Update the book quantity after issuing
                     updateBookQuantity(bookID); // This will decrease the quantity in the database
+                    
+                    // ask if they want to print a receipt
+                    int choice = javax.swing.JOptionPane.showConfirmDialog(
+                    this,
+                    "Do you want to print a receipt for this book issuance?",
+                    "Print Receipt",
+                    javax.swing.JOptionPane.YES_NO_OPTION
+                );
+
+                if (choice == javax.swing.JOptionPane.YES_OPTION) {
+                    int latestIssueId = getLatestIssueId();
+                    generatePDFReceipt(latestIssueId);
+}
                 } else {
                     javax.swing.JOptionPane.showMessageDialog(this, "Failed to issue book.");
                 }
@@ -732,6 +774,104 @@ public class IssueBook extends javax.swing.JFrame {
         return_date.setDate(null);
         
     }
+    
+    private void generatePDFReceipt(int issueId) {
+    try (Connection conn = DBConnection.connect()) {
+        String sql = "SELECT ib.issue_id, ib.issue_date, ib.return_date, s.student_id, s.student_name, " +
+                     "s.student_program, s.student_year, b.book_id, b.book_name, b.author_name " +
+                     "FROM issued_books ib " +
+                     "JOIN students s ON ib.student_id = s.student_id " +
+                     "JOIN books b ON ib.book_id = b.book_id " +
+                     "WHERE ib.issue_id = ?";
+        PreparedStatement stmt = conn.prepareStatement(sql);
+        stmt.setInt(1, issueId);
+        ResultSet rs = stmt.executeQuery();
+
+        if (rs.next()) {
+            String issueID = String.valueOf(issueId);
+            String studentID = rs.getString("student_id");
+            String studentName = rs.getString("student_name");
+            String program = rs.getString("student_program");
+            String year = rs.getString("student_year");
+            String bookID = rs.getString("book_id");
+            String bookName = rs.getString("book_name");
+            String author = rs.getString("author_name");
+            Date issueDate = rs.getDate("issue_date");
+            Date returnDate = rs.getDate("return_date");
+
+            // Call your original method
+            generatePDFReceipt(issueID, studentID, studentName, program, year, bookID, bookName, author, issueDate, returnDate);
+        }
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+        javax.swing.JOptionPane.showMessageDialog(this, "Error generating receipt: " + e.getMessage());
+    }
+}
+    
+    public void generatePDFReceipt(String issueId, String studentID, String studentName, String program, String year,
+                                String bookID, String bookName, String author,
+                                Date issueDate, Date returnDate) {
+    Document document = new Document();
+    try {
+        String fileName = "C:\\Users\\John Chris Ledama\\Downloads\\Library Receipt_" + issueId + ".pdf";
+        PdfWriter.getInstance(document, new FileOutputStream(fileName));
+        document.open();
+
+        // Title
+        Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18, Font.BOLD);
+        Paragraph title = new Paragraph("Library Book Issue Receipt", titleFont);
+        title.setAlignment(Element.ALIGN_CENTER);
+        document.add(title);
+        document.add(new Paragraph("\n"));
+
+        // Issue Details
+        PdfPTable table = new PdfPTable(2);
+        table.setWidthPercentage(100);
+        table.setSpacingBefore(10f);
+
+        // Student Info
+        table.addCell("Student ID:");
+        table.addCell(studentID);
+        table.addCell("Name:");
+        table.addCell(studentName);
+        table.addCell("Program:");
+        table.addCell(program);
+        table.addCell("Year:");
+        table.addCell(year);
+
+        // Book Info
+        table.addCell("Book ID:");
+        table.addCell(bookID);
+        table.addCell("Title:");
+        table.addCell(bookName);
+        table.addCell("Author:");
+        table.addCell(author);
+
+        // Dates
+        table.addCell("Issue Date:");
+        table.addCell(issueDate.toString());
+        table.addCell("Return Date:");
+        table.addCell(returnDate.toString());
+
+        document.add(table);
+
+        // Footer
+        document.add(new Paragraph("\nReminder: Please return the book on or before the due date to avoid penalties."));
+        document.close();
+
+        javax.swing.JOptionPane.showMessageDialog(this, "Receipt saved as: " + fileName);
+        
+        File pdfFile = new File(fileName);
+        if (Desktop.isDesktopSupported()) {
+            Desktop.getDesktop().open(pdfFile);
+        }
+        
+    } catch (Exception e) {
+        e.printStackTrace();
+        javax.swing.JOptionPane.showMessageDialog(this, "Failed to generate receipt: " + e.getMessage());
+    }
+}
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel book_author;
