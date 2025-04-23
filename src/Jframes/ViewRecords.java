@@ -8,6 +8,8 @@ import com.formdev.flatlaf.FlatDarculaLaf;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
+import java.util.ArrayList;
+import java.util.List;
 import java.awt.*;
 import java.sql.*;
 import java.sql.Connection;
@@ -17,6 +19,7 @@ import java.sql.Statement;
 import Database.DBConnection;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.text.SimpleDateFormat;
 
 public class ViewRecords extends javax.swing.JFrame {
 
@@ -140,53 +143,94 @@ public class ViewRecords extends javax.swing.JFrame {
 
     }
     
+    private int getStatusPriority(String status) {
+    switch (status) {
+        case "Overdue": return 0;
+        case "Active": return 1;
+        case "Returned": return 2;
+        default: return 3; // catch-all for unexpected statuses
+    }
+}
+    
     public void loadIssuedBookRecords() {
         Connection con;
         PreparedStatement pst;
         ResultSet rs;
-
         try {
             // Connect to DB
             Connection conn = DBConnection.connect();
-
             // Query
             String sql = "SELECT ib.issue_id, ib.book_id, b.book_name, s.student_id, s.student_name, " +
-                     "ib.issue_date, ib.return_date, ib.status " +
-                     "FROM issued_books ib " +
-                     "JOIN books b ON ib.book_id = b.book_id " +
-                     "JOIN students s ON ib.student_id = s.student_id";
-
+                         "ib.issue_date, ib.return_date, ib.status " +
+                         "FROM issued_books ib " +
+                         "JOIN books b ON ib.book_id = b.book_id " +
+                         "JOIN students s ON ib.student_id = s.student_id";
             pst = conn.prepareStatement(sql);
             rs = pst.executeQuery();
 
+            // Collect rows into a list
+            List<Object[]> rows = new ArrayList<Object[]>();
+            while (rs.next()) {
+                int issueID = rs.getInt("issue_id");
+                String bookID = rs.getString("book_id");
+                String bookName = rs.getString("book_name");
+                String studentID = rs.getString("student_id");
+                String studentName = rs.getString("student_name");
+                java.sql.Date issueDate = rs.getDate("issue_date");
+                java.sql.Date returnDate = rs.getDate("return_date");
+                String dbStatus = rs.getString("status");
+
+                // Dynamically determine if overdue
+                String status = dbStatus;
+                if ("Active".equalsIgnoreCase(dbStatus) && returnDate != null) {
+                    LocalDate today = LocalDate.now();
+                    LocalDate dueDate = returnDate.toLocalDate();
+                    if (dueDate.isBefore(today)) {
+                        status = "Overdue";
+                    }
+                }
+
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                rows.add(new Object[]{
+                    issueID, bookName, bookID, studentName, studentID,
+                    sdf.format(issueDate),
+                    returnDate != null ? sdf.format(returnDate) : "N/A",
+                    status
+                });
+            }
+
+            // Sort rows: first "Overdue", then "Active" and "Returned"
+            rows.sort((row1, row2) -> {
+            String status1 = (String) row1[7];
+            String status2 = (String) row2[7];
+
+            int priority1 = getStatusPriority(status1);
+            int priority2 = getStatusPriority(status2);
+
+            if (priority1 != priority2) {
+                return Integer.compare(priority1, priority2); // sort by priority
+            } else {
+                return Integer.compare((int) row1[0], (int) row2[0]); // then by issue ID
+            }
+        });
+
             // Table model
-            DefaultTableModel model = (DefaultTableModel) ViewRecords.getModel(); // replace 'yourTable' with your JTable
+            DefaultTableModel model = (DefaultTableModel) ViewRecords.getModel();
             model.setRowCount(0); // clear table
 
-            while (rs.next()) {
-                model.addRow(new Object[] {
-                    rs.getString("issue_id"),
-                    rs.getString("book_name"),
-                    rs.getString("book_id"),
-                    rs.getString("student_name"),
-                    rs.getString("student_id"),
-                    rs.getDate("issue_date"),
-                    rs.getDate("return_date"),
-                    rs.getString("status")
-                });
+            // Add the sorted rows back to the table model
+            for (Object[] row : rows) {
+                model.addRow(row);
             }
 
             rs.close();
             pst.close();
             conn.close();
-
         } catch (Exception e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Error loading records: " + e.getMessage());
         }
 }
-    
-    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton Back;
     private javax.swing.JLabel ViewRecord_Label;
