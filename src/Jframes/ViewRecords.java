@@ -44,6 +44,9 @@ public class ViewRecords extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         ViewRecords = new javax.swing.JTable();
         Back = new javax.swing.JButton();
+        searchTextField = new javax.swing.JTextField();
+        jLabel2 = new javax.swing.JLabel();
+        jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(102, 0, 51));
@@ -89,6 +92,26 @@ public class ViewRecords extends javax.swing.JFrame {
             }
         });
 
+        searchTextField.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        searchTextField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                searchTextFieldActionPerformed(evt);
+            }
+        });
+
+        jLabel2.setFont(new java.awt.Font("Segoe UI", 0, 22)); // NOI18N
+        jLabel2.setText("Search:");
+
+        jButton1.setBackground(new java.awt.Color(25, 25, 25));
+        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Icons/search.png"))); // NOI18N
+        jButton1.setBorderPainted(false);
+        jButton1.setFocusPainted(false);
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -98,21 +121,37 @@ public class ViewRecords extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(Back, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(222, 222, 222)
-                        .addComponent(ViewRecord_Label))
+                        .addGap(221, 221, 221)
+                        .addComponent(ViewRecord_Label)
+                        .addGap(79, 79, 79)
+                        .addComponent(jLabel2)
+                        .addGap(18, 18, 18)
+                        .addComponent(searchTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 1408, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(20, Short.MAX_VALUE))
+                .addContainerGap(19, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(13, 13, 13)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(Back, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(ViewRecord_Label))
-                .addGap(12, 12, 12)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 535, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(21, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(31, 31, 31)
+                        .addComponent(Back, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addContainerGap(41, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                .addComponent(jButton1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                    .addComponent(searchTextField, javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.LEADING)))
+                            .addComponent(ViewRecord_Label))
+                        .addGap(39, 39, 39)))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 554, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(35, 35, 35))
         );
 
         pack();
@@ -125,6 +164,16 @@ public class ViewRecords extends javax.swing.JFrame {
         this.dispose();
         mainFrame.setVisible(true);
     }//GEN-LAST:event_BackActionPerformed
+
+    private void searchTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchTextFieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_searchTextFieldActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        String searchTerm = searchTextField.getText().trim();
+        searchIssuedBooks(searchTerm);
+    }//GEN-LAST:event_jButton1ActionPerformed
 
     public static void main(String args[]) {
        try {
@@ -231,10 +280,84 @@ public class ViewRecords extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Error loading records: " + e.getMessage());
         }
 }
+    
+    public void searchIssuedBooks(String searchTerm) {
+    String sql = "SELECT ib.issue_id, ib.book_id, b.book_name, s.student_id, s.student_name, " +
+             "ib.issue_date, ib.return_date, ib.status " +
+             "FROM issued_books ib " +
+             "JOIN books b ON ib.book_id = b.book_id " +
+             "JOIN students s ON ib.student_id = s.student_id " +
+             "WHERE (? = '' OR ib.issue_id LIKE ? OR ib.book_id LIKE ? OR b.book_name LIKE ? " +
+             "OR s.student_id LIKE ? OR s.student_name LIKE ? OR ib.status LIKE ?) " +
+             "ORDER BY " +
+             "CASE ib.status " +
+             "  WHEN 'Overdue' THEN 1 " +
+             "  WHEN 'Active' THEN 2 " +
+             "  WHEN 'Returned' THEN 3 " +
+             "  ELSE 4 " +
+             "END, ib.issue_id";
+
+    try {
+        Connection conn = DBConnection.connect();
+        PreparedStatement stmt = conn.prepareStatement(sql);
+        String searchPattern = "%" + searchTerm + "%";
+
+        stmt.setString(1, searchTerm);       // For `? = ''`
+        stmt.setString(2, searchPattern);    // ib.issue_id
+        stmt.setString(3, searchPattern);    // ib.book_id
+        stmt.setString(4, searchPattern);    // b.book_name
+        stmt.setString(5, searchPattern);    // s.student_id
+        stmt.setString(6, searchPattern);    // s.student_name
+        stmt.setString(7, searchPattern);    // ib.status
+
+        ResultSet rs = stmt.executeQuery();
+        DefaultTableModel model = (DefaultTableModel) ViewRecords.getModel();
+        model.setRowCount(0);
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        while (rs.next()) {
+            int issueID = rs.getInt("issue_id");
+            String bookID = rs.getString("book_id");
+            String bookName = rs.getString("book_name");
+            String studentID = rs.getString("student_id");
+            String studentName = rs.getString("student_name");
+            java.sql.Date issueDate = rs.getDate("issue_date");
+            java.sql.Date returnDate = rs.getDate("return_date");
+            String dbStatus = rs.getString("status");
+
+            // Check for overdue if status is Active
+            String status = dbStatus;
+            if ("Active".equalsIgnoreCase(dbStatus) && returnDate != null) {
+                LocalDate today = LocalDate.now();
+                LocalDate dueDate = returnDate.toLocalDate();
+                if (dueDate.isBefore(today)) {
+                    status = "Overdue";
+                }
+            }
+
+            model.addRow(new Object[]{
+                issueID, bookName, bookID, studentName, studentID,
+                sdf.format(issueDate),
+                returnDate != null ? sdf.format(returnDate) : "N/A",
+                status
+            });
+        }
+        rs.close();
+        stmt.close();
+        conn.close();
+    } catch (SQLException e) {
+        e.printStackTrace();
+        JOptionPane.showMessageDialog(this, "Error searching records: " + e.getMessage());
+    }
+}
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton Back;
     private javax.swing.JLabel ViewRecord_Label;
     private javax.swing.JTable ViewRecords;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTextField searchTextField;
     // End of variables declaration//GEN-END:variables
 }
