@@ -729,7 +729,6 @@ public class IssueBook extends javax.swing.JFrame {
         student_program.setText("");
         student_year.setText("");
         
-        issue_date.setDate(null);
         return_date.setDate(null);
         
     }
